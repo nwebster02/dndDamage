@@ -2,12 +2,28 @@ package dndDamage;
 
 public class Damage {
 	
-	private DamageType damageType;
 	private double num;
+	private DamageType damageType;
 	
 	public Damage(double num, DamageType damageType) {
 		this.num = num;
 		this.damageType = damageType;
+	}
+	
+	public void add(Damage other) throws IllegalArgumentException {
+		if(this.damageType != other.damageType) {
+			throw new IllegalArgumentException();
+		} else {
+			this.num += other.num;
+		}
+	}
+	
+	public double getNum() {
+		return num;
+	}
+	
+	public DamageType getDamageType() {
+		return damageType;
 	}
 	
 	public String toString() {
@@ -16,7 +32,6 @@ public class Damage {
 		} else {
 			return ((int)Math.floor(num)) + " points of " + damageType + " damage";
 		}
-		
 	}
 	
 }

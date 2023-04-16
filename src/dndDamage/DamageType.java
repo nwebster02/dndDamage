@@ -5,14 +5,14 @@ public enum DamageType {
 	NECROTIC("necrotic"), PIERCING("piercing"), POISON("poison"), PSYCHIC("psychic"), RADIANT("radiant"),
 	SLASHING("slashing"), THUNDER("thunder");
 
-	private String name;
+	private String type;
 
 	DamageType(String type) {
-		name = type;
+		this.type = type;
 	}
 
 	public String toString() {
-		return name;
+		return type;
 	}
 
 }

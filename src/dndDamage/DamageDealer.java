@@ -2,14 +2,25 @@ package dndDamage;
 
 import java.util.ArrayList;
 
-public abstract class DamageDealer {
-
+public abstract class DamageDealer implements Roll{
+	
+	private String name;
 	private int[] diceAmount;
 	private int[] diceSides;
 	private int[] constants;
 	private DamageType[] diceDamageType;
-
-	public DamageDealer(int amount, int sides, int constant, DamageType damageType) {
+	
+	public DamageDealer() throws IllegalArgumentException {
+		throw new IllegalArgumentException();
+	}
+	
+	public DamageDealer(String name, String damageString) {
+		this.name = name;
+		interpretString(damageString);
+	}
+	
+	public DamageDealer(String name, int amount, int sides, int constant, DamageType damageType) {
+		this.name = name;
 		diceAmount = new int[1];
 		diceSides = new int[1];
 		constants = new int[1];
@@ -21,10 +32,11 @@ public abstract class DamageDealer {
 		diceDamageType[0] = damageType;
 	}
 
-	public DamageDealer(int[] diceAmount, int[] diceSides, int[] constants, DamageType[] diceDamageType)
+	public DamageDealer(String name, int[] diceAmount, int[] diceSides, int[] constants, DamageType[] diceDamageType)
 			throws IllegalArgumentException {
 		if (diceAmount.length == diceSides.length && diceAmount.length == constants.length
 				&& diceAmount.length == diceDamageType.length) {
+			this.name = name;
 			this.diceAmount = diceAmount;
 			this.diceSides = diceSides;
 			this.constants = constants;
@@ -32,34 +44,6 @@ public abstract class DamageDealer {
 		} else {
 			throw new IllegalArgumentException();
 		}
-	}
-	
-	public ArrayList<Damage> getAverageDamage(boolean crit) {
-		ArrayList<Damage> damageList = new ArrayList<Damage>();
-		for(int i = 0; i < diceAmount.length; i++) {
-			double damage;
-			if(crit) {
-				damage = 2 * diceAmount[i] * ((diceSides[i] / 2.0) + 0.5) + constants[i];
-			} else {
-				damage = diceAmount[i] * ((diceSides[i] / 2.0) + 0.5) + constants[i];
-			}
-			damageList.add(new Damage(damage, diceDamageType[i]));
-		}
-		return damageList;
-	}
-
-	public double getTotalAverageDamage(boolean crit) {
-		double total = 0;
-		for(int i = 0; i < diceAmount.length; i++) {
-			double damage;
-			if(crit) {
-				damage = 2 * diceAmount[i] * ((diceSides[i] / 2.0) + 0.5) + constants[i];
-			} else {
-				damage = diceAmount[i] * ((diceSides[i] / 2.0) + 0.5) + constants[i];
-			}
-			total += damage;
-		}
-		return total;
 	}
 
 	public ArrayList<Damage> rollDamage(boolean crit) {
@@ -69,7 +53,7 @@ public abstract class DamageDealer {
 			if(crit) {
 				damage += rollDice(diceAmount[i], diceSides[i]);
 			}
-			damageList.add(new Damage(damage, diceDamageType[i]));
+			damageList.add(new Damage(Math.min(1, damage), diceDamageType[i]));
 		}
 		return damageList;
 	}
@@ -83,15 +67,35 @@ public abstract class DamageDealer {
 			}
 			total += damage;
 		}
-		return total;
+		return Math.min(1, total);
 	}
-
-	private int rollDice(int amount, int sides) {
-		int total = 0;
-		for (int i = 0; i < amount; i++) {
-			total += (int) (Math.random() * sides + 1);
+	
+	private void interpretString(String input) {
+		String[] damages = input.split(" + ");
+		int size = damages.length;
+		diceAmount = new int[size];
+		diceSides = new int[size];
+		constants = new int[size];
+		diceDamageType = new DamageType[size];
+		for(int i = 0; i < size; i++) {
+			String[] split = damages[i].split(" ");
+			diceDamageType[i] = DamageType.valueOf(split[1]);
+			if(split[0].contains("+")) {
+				split = split[0].split("+");
+				constants[i] = Integer.parseInt(split[1]);
+			} else if (split[0].contains("-")) {
+				split = split[0].split("-");
+				constants[i] = Integer.parseInt(split[1]) * -1;
+			}
+			if(split[0].contains("d")) {
+				split = split[0].split("d");
+				diceSides[i] = Integer.parseInt(split[1]);
+				diceAmount[i] = Integer.parseInt(split[0]);
+			} else {
+				constants[i] = Integer.parseInt(split[0]);
+			}
+			
 		}
-		return total;
 	}
 
 }
