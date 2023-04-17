@@ -71,17 +71,17 @@ public abstract class DamageDealer implements Roll{
 	}
 	
 	private void interpretString(String input) {
-		String[] damages = input.split(" + ");
+		String[] damages = input.split(" \\+ "); //Different Damages
 		int size = damages.length;
 		diceAmount = new int[size];
 		diceSides = new int[size];
 		constants = new int[size];
 		diceDamageType = new DamageType[size];
 		for(int i = 0; i < size; i++) {
-			String[] split = damages[i].split(" ");
-			diceDamageType[i] = DamageType.valueOf(split[1]);
+			String[] split = damages[i].split(" "); //Damage and Type
+			diceDamageType[i] = DamageType.valueOf(split[1].toUpperCase());
 			if(split[0].contains("+")) {
-				split = split[0].split("+");
+				split = split[0].split("\\+");
 				constants[i] = Integer.parseInt(split[1]);
 			} else if (split[0].contains("-")) {
 				split = split[0].split("-");
