@@ -2,99 +2,66 @@ package dndDamage;
 
 import java.util.ArrayList;
 
-public abstract class DamageDealer implements Roll{
+public abstract class DamageDealer {
 	
 	private String name;
-	private int[] diceAmount;
-	private int[] diceSides;
-	private int[] constants;
-	private DamageType[] diceDamageType;
-	
-	public DamageDealer() throws IllegalArgumentException {
-		throw new IllegalArgumentException();
-	}
+	private ArrayList<ArrayList<Dice>> dice;
+	private ArrayList<Integer> constants;
+	private ArrayList<DamageType> diceDamageType;
 	
 	public DamageDealer(String name, String damageString) {
 		this.name = name;
 		interpretString(damageString);
 	}
-	
-	public DamageDealer(String name, int amount, int sides, int constant, DamageType damageType) {
-		this.name = name;
-		diceAmount = new int[1];
-		diceSides = new int[1];
-		constants = new int[1];
-		diceDamageType = new DamageType[1];
-
-		diceAmount[0] = amount;
-		diceSides[0] = sides;
-		constants[0] = constant;
-		diceDamageType[0] = damageType;
-	}
-
-	public DamageDealer(String name, int[] diceAmount, int[] diceSides, int[] constants, DamageType[] diceDamageType)
-			throws IllegalArgumentException {
-		if (diceAmount.length == diceSides.length && diceAmount.length == constants.length
-				&& diceAmount.length == diceDamageType.length) {
-			this.name = name;
-			this.diceAmount = diceAmount;
-			this.diceSides = diceSides;
-			this.constants = constants;
-			this.diceDamageType = diceDamageType;
-		} else {
-			throw new IllegalArgumentException();
-		}
-	}
 
 	public ArrayList<Damage> rollDamage(boolean crit) {
 		ArrayList<Damage> damageList = new ArrayList<Damage>();
-		for(int i = 0; i < diceAmount.length; i++) {
-			int damage = rollDice(diceAmount[i], diceSides[i]) + constants[i];;
-			if(crit) {
-				damage += rollDice(diceAmount[i], diceSides[i]);
+		for(int i = 0; i < diceDamageType.size(); i++) {
+			ArrayList<Dice> diceList = dice.get(i);
+			int total = constants.get(i);
+			for(Dice d: diceList) {
+				total += d.roll();
+				if(crit) {
+					total += d.roll();
+				}
 			}
-			damageList.add(new Damage(Math.min(1, damage), diceDamageType[i]));
+			damageList.add(new Damage(Math.min(1, total), diceDamageType.get(i)));
 		}
 		return damageList;
 	}
 
 	public int rollTotalDamage(boolean crit) {
+		ArrayList<Damage> damageList = rollDamage(crit);
 		int total = 0;
-		for(int i = 0; i < diceAmount.length; i++) {
-			int damage = rollDice(diceAmount[i], diceSides[i]) + constants[i];;
-			if(crit) {
-				damage += rollDice(diceAmount[i], diceSides[i]);
-			}
-			total += damage;
+		for(Damage d: damageList) {
+			total += d.getNum();
 		}
-		return Math.min(1, total);
+		return total;
 	}
 	
 	private void interpretString(String input) {
 		String[] damages = input.split(" \\+ "); //Different Damages
 		int size = damages.length;
-		diceAmount = new int[size];
-		diceSides = new int[size];
-		constants = new int[size];
-		diceDamageType = new DamageType[size];
+		dice = new ArrayList<ArrayList<Dice>>(size);
+		constants = new ArrayList<Integer>(size);
+		diceDamageType = new ArrayList<DamageType>(size);
 		for(int i = 0; i < size; i++) {
 			String[] split = damages[i].split(" "); //Damage and Type
-			diceDamageType[i] = DamageType.valueOf(split[1].toUpperCase());
-			if(split[0].contains("+")) {
-				split = split[0].split("\\+");
-				constants[i] = Integer.parseInt(split[1]);
-			} else if (split[0].contains("-")) {
-				split = split[0].split("-");
-				constants[i] = Integer.parseInt(split[1]) * -1;
+			diceDamageType.add(i, DamageType.valueOf(split[1].toUpperCase())); 
+			String[] diceVals = split[0].split("[+-]");
+			ArrayList<Dice> diceList = new ArrayList<Dice>();
+			for(String s: diceVals) {
+				if(s.contains("d")) {
+					diceList.add(new Dice(s));
+				} else {
+					if(split[0].contains("-")) {
+						constants.add(i, -1 * Integer.parseInt(s));
+					} else {
+						constants.add(i, Integer.parseInt(s));
+					}
+				}
 			}
-			if(split[0].contains("d")) {
-				split = split[0].split("d");
-				diceSides[i] = Integer.parseInt(split[1]);
-				diceAmount[i] = Integer.parseInt(split[0]);
-			} else {
-				constants[i] = Integer.parseInt(split[0]);
-			}
-			
+			dice.add(i, diceList);
 		}
 	}
 
