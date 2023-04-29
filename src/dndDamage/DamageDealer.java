@@ -25,7 +25,7 @@ public abstract class DamageDealer {
 					total += d.roll();
 				}
 			}
-			damageList.add(new Damage(Math.min(1, total), diceDamageType.get(i)));
+			damageList.add(new Damage(Math.max(1, total), diceDamageType.get(i)));
 		}
 		return damageList;
 	}
@@ -36,7 +36,7 @@ public abstract class DamageDealer {
 		for(Damage d: damageList) {
 			total += d.getNum();
 		}
-		return total;
+		return Math.max(1, total);
 	}
 	
 	private void interpretString(String input) {
@@ -56,13 +56,20 @@ public abstract class DamageDealer {
 				} else {
 					if(split[0].contains("-")) {
 						constants.add(i, -1 * Integer.parseInt(s));
-					} else {
+					} else if(split[0].contains("+")) {
 						constants.add(i, Integer.parseInt(s));
 					}
 				}
 			}
+			if(constants.size() - 1 < i) {
+				constants.add(i, 0);
+			}
 			dice.add(i, diceList);
 		}
+	}
+	
+	public String getName() {
+		return name;
 	}
 
 }

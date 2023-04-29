@@ -18,6 +18,10 @@ public class Damage {
 		}
 	}
 	
+	public void divide(int val) {
+		num /= val;
+	}
+	
 	public double getNum() {
 		return num;
 	}
@@ -27,10 +31,10 @@ public class Damage {
 	}
 	
 	public String toString() {
-		if(num == 1) {
-			return ((int)Math.floor(num)) + " point of " + damageType + " damage";
+		if(num - 1.0 < 1E-3) {
+			return "1.0 point of " + damageType + " damage";
 		} else {
-			return ((int)Math.floor(num)) + " points of " + damageType + " damage";
+			return (Math.round(num * 100) / 100.0) + " points of " + damageType + " damage";
 		}
 	}
 	

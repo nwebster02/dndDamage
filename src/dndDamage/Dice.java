@@ -5,12 +5,12 @@ public class Dice {
 	private int amount;
 	private int sides;
 	
-	Dice(int amount, int sides) {
+	public Dice(int amount, int sides) {
 		this.amount = amount;
 		this.sides = sides;
 	}
 	
-	Dice(String input) {
+	public Dice(String input) {
 		String[] split = input.split("d");
 		amount = Integer.parseInt(split[0]);
 		sides = Integer.parseInt(split[1]);
