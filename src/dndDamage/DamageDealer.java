@@ -5,17 +5,19 @@ import java.util.ArrayList;
 public abstract class DamageDealer {
 	
 	private String name;
+	private String damageString;
 	private ArrayList<ArrayList<Dice>> dice;
 	private ArrayList<Integer> constants;
 	private ArrayList<DamageType> diceDamageType;
 	
 	public DamageDealer(String name, String damageString) {
 		this.name = name;
+		this.damageString = damageString;
 		interpretString(damageString);
 	}
 
-	public ArrayList<Damage> rollDamage(boolean crit) {
-		ArrayList<Damage> damageList = new ArrayList<Damage>();
+	public DamageList rollDamage(boolean crit) {
+		DamageList damageList = new DamageList();
 		for(int i = 0; i < diceDamageType.size(); i++) {
 			ArrayList<Dice> diceList = dice.get(i);
 			int total = constants.get(i);
@@ -31,9 +33,9 @@ public abstract class DamageDealer {
 	}
 
 	public int rollTotalDamage(boolean crit) {
-		ArrayList<Damage> damageList = rollDamage(crit);
+		DamageList damageList = rollDamage(crit);
 		int total = 0;
-		for(Damage d: damageList) {
+		for(Damage d: damageList.getList()) {
 			total += d.getNum();
 		}
 		return Math.max(1, total);
@@ -70,6 +72,10 @@ public abstract class DamageDealer {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public String getDamageString() {
+		return damageString;
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import dndDamage.Dice;
 import dndDamage.Weapon;
 import dndDamage.Damage;
+import dndDamage.DamageList;
 import dndDamage.DamageType;
 
 public class WeaponTest {
@@ -21,53 +22,48 @@ public class WeaponTest {
 
 		Dice d20 = new Dice(1, 20);
 		ArrayList<Weapon> weaponList = new ArrayList<Weapon>();
-		HashMap<String, ArrayList<Damage>> weaponDamages = new HashMap<String, ArrayList<Damage>>();
-		
+		HashMap<String, DamageList> weaponDamages = new HashMap<String, DamageList>();
+		/*
 		weaponList.add(new Weapon("Anvyrth's Flaming Wit's End", "1d10+1d6+6 slashing + 2d6 fire"));
-		weaponList.add(new Weapon("Quill's Green-Flame Blade", "1d8+1d6+3 slashing + 1d8 fire"));
+		weaponList.add(new Weapon("Quill's Green-Flame Blade", "1d8+1d6+3 slashing + 2d8+4 fire"));
 		weaponList.add(new Weapon("Gunthar's Sharpshooter Crossbow w/ Bursting Bolts", "1d10+13 piercing + 2d6 force"));
 		weaponList.add(new Weapon("Ilzak's Smiting Lance of Vengeance", "1d12+7 piercing + 6d8 radiant"));
-
+		*/
+		weaponList.add(new Weapon("Qa'ri's Empowered Bite", "1d4+1d6+13 piercing + 2d8 psychic + 1d8 force"));
+		weaponList.add(new Weapon("Eitri's Horrible Mess", "2d8+11 piercing + 4d8 radiant"));
+		
 		for (Weapon weapon : weaponList) {
-			ArrayList<Damage> damageList = new ArrayList<Damage>();
+			DamageList damageList = new DamageList();
 			weaponDamages.put(weapon.getName(), damageList);
 			for (int i = 0; i < ITERATION; i++) {
 				int roll = d20.roll();
-				ArrayList<Damage> damages;
+				DamageList damages;
 				if (roll >= weapon.getCritPos()) {
 					damages = weapon.rollDamage(true);
 				} else if (roll > weapon.getCritNeg() && roll + ABILITY_MOD >= AC) {
 					damages = weapon.rollDamage(false);
 				} else {
-					damages = new ArrayList<Damage>();
+					damages = new DamageList();
 				}
-				for (int j = 0; j < damages.size(); j++) {
-					if (damageList.size() - 1 < j) {
-						damageList.add(damages.get(j));
-					} else {
-						damageList.get(j).add(damages.get(j));
-					}
-				}
+				damageList.add(damages);
 			}
-			for (Damage d : damageList) {
-				d.divide(ITERATION);
-			}
+			damageList.divide(ITERATION);
 		}
 
 		System.out.println("Against a target with an AC of " + AC + ":");
 		for (Weapon weapon : weaponList) {
-			ArrayList<Damage> damageList = weaponDamages.get(weapon.getName());
-			double total = 0;
-			System.out.println("\n'" + weapon.getName() + "' deals");
-			for (int i = 0; i < damageList.size(); i++) {
-				total += damageList.get(i).getNum();
-				System.out.print(damageList.get(i));
-				if (i < damageList.size() - 1) {
+			DamageList damageList = weaponDamages.get(weapon.getName());
+			ArrayList<Damage> damages = damageList.getList();
+			System.out.println("\n'" + weapon.getName() + "' (" + weapon.getDamageString() + ") deals");
+			for (int i = 0; i < damages.size(); i++) {;
+				System.out.print(damages.get(i));
+				if (i < damages.size() - 1) {
 					System.out.print(" + ");
 				} else {
 					System.out.print(" on average");
 				}
 			}
+			double total = damageList.getTotalDamage();
 			total = Math.round(total * 100) / 100.0;
 			if(damageList.size() > 1) {
 				if(total - 1.0 < 1E-3) {
