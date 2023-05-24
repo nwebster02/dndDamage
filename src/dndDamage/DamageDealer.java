@@ -27,22 +27,18 @@ public abstract class DamageDealer {
 					total += d.roll();
 				}
 			}
-			damageList.add(new Damage(Math.max(1, total), diceDamageType.get(i)));
+			total = Math.max(1, total);
+			damageList.add(new Damage(total, diceDamageType.get(i)));
 		}
 		return damageList;
 	}
 
 	public int rollTotalDamage(boolean crit) {
-		DamageList damageList = rollDamage(crit);
-		int total = 0;
-		for(Damage d: damageList.getList()) {
-			total += d.getNum();
-		}
-		return Math.max(1, total);
+		return (int)(rollDamage(crit).getTotalDamage());
 	}
 	
-	private void interpretString(String input) {
-		String[] damages = input.split(" \\+ "); //Different Damages
+	private void interpretString(String input) throws IllegalArgumentException {
+		String[] damages = input.split(" \\+ "); //Different Damage Types
 		int size = damages.length;
 		dice = new ArrayList<ArrayList<Dice>>(size);
 		constants = new ArrayList<Integer>(size);
@@ -50,20 +46,28 @@ public abstract class DamageDealer {
 		for(int i = 0; i < size; i++) {
 			String[] split = damages[i].split(" "); //Damage and Type
 			diceDamageType.add(i, DamageType.valueOf(split[1].toUpperCase())); 
-			String[] diceVals = split[0].split("[+-]");
+			String[] diceVals = split[0].split("[+-]"); //Dice and Constants
 			ArrayList<Dice> diceList = new ArrayList<Dice>();
 			for(String s: diceVals) {
-				if(s.contains("d")) {
+				if(s.contains("d")) { //Dice
 					diceList.add(new Dice(s));
-				} else {
-					if(split[0].contains("-")) {
-						constants.add(i, -1 * Integer.parseInt(s));
-					} else if(split[0].contains("+")) {
-						constants.add(i, Integer.parseInt(s));
+				} else if(constants.size() - 1 < i) {
+					try {
+						if(split[0].contains("-")) { //Negative Constant
+							constants.add(i, -1 * Integer.parseInt(s));
+						} else if(split[0].contains("+")) { //Positive Constant
+							constants.add(i, Integer.parseInt(s));
+						} else {
+							constants.add(i, Integer.parseInt(s));
+						}
+					} catch(Error e) {
+						throw new IllegalArgumentException("Incorrect format for '" + split[0] + "'.");
 					}
+				} else {
+					throw new IllegalArgumentException("Incorrect format for '" + split[0] + "'.");
 				}
 			}
-			if(constants.size() - 1 < i) {
+			if(constants.size() - 1 < i) { //If no constants included for type i.e. '1d6 slashing', add 0
 				constants.add(i, 0);
 			}
 			dice.add(i, diceList);

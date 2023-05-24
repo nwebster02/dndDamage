@@ -5,9 +5,11 @@ import java.util.HashMap;
 
 public class DamageList implements Comparable<DamageList>{
 
+	ArrayList<Damage> list;
 	HashMap<DamageType, Damage> map;
 	
 	public DamageList() {
+		list = new ArrayList<Damage>();
 		map = new HashMap<DamageType, Damage>();
 	}
 	
@@ -16,6 +18,7 @@ public class DamageList implements Comparable<DamageList>{
 		if(map.containsKey(damageType)) {
 			map.get(damageType).add(damage);
 		} else {
+			list.add(damage);
 			map.put(damageType, damage);
 		}
 	}
@@ -27,21 +30,21 @@ public class DamageList implements Comparable<DamageList>{
 	}
 	
 	public void divide(int val) {
-		for(Damage d: map.values()) {
+		for(Damage d: list) {
 			d.divide(val);
 		}
 	}
 	
 	public ArrayList<Damage> getList() {
-		return new ArrayList<Damage>(map.values());
+		return list;
 	}
 	
 	public int size() {
-		return getList().size();
+		return list.size();
 	}
 	
 	public Damage get(int index) {
-		return getList().get(index);
+		return list.get(index);
 	}
 
 	public Damage get(DamageType damageType) {
@@ -50,7 +53,7 @@ public class DamageList implements Comparable<DamageList>{
 	
 	public double getTotalDamage() {
 		double total = 0;
-		for(Damage d: map.values()) {
+		for(Damage d: list) {
 			total += d.getNum();
 		}
 		return total;

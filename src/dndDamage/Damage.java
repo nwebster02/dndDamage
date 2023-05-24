@@ -31,7 +31,7 @@ public class Damage {
 	}
 	
 	public String toString() {
-		if(num - 1.0 < 1E-3) {
+		if(Math.abs(num - 1.0) <  0.01) {
 			return "1.0 point of " + damageType + " damage";
 		} else {
 			return (Math.round(num * 100) / 100.0) + " points of " + damageType + " damage";
